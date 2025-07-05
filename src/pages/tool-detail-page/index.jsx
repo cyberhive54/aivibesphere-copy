@@ -9,243 +9,90 @@ import RatingSystem from './components/RatingSystem';
 import RelatedTools from './components/RelatedTools';
 import AdBanner from './components/AdBanner';
 import Icon from '../../components/AppIcon';
+import toolsService from '../../utils/toolsService';
+import ratingsService from '../../utils/ratingsService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ToolDetailPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const toolId = searchParams.get('id') || '1';
+  const toolId = searchParams.get('id') || searchParams.get('tool') || '1';
   
   const [tool, setTool] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [userRating, setUserRating] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [relatedTools, setRelatedTools] = useState([]);
+  const [error, setError] = useState(null);
   
   const { addToComparison, isInComparison } = useComparison();
-
-  // Mock data for the tool
-  const mockTool = {
-    id: toolId,
-    name: "ChatGPT",
-    shortDescription: "Advanced AI chatbot powered by GPT-4 for natural language conversations, content creation, and problem-solving across multiple domains.",
-    fullDescription: `ChatGPT is a state-of-the-art conversational AI developed by OpenAI, built on the GPT-4 architecture. It represents a significant leap forward in natural language processing, offering human-like conversations and comprehensive assistance across a wide range of topics and tasks.
-
-The model has been trained on diverse internet text and fine-tuned through reinforcement learning from human feedback (RLHF), making it remarkably capable of understanding context, maintaining coherent conversations, and providing helpful, accurate responses.`,
-    additionalInfo: `What sets ChatGPT apart is its ability to understand nuanced requests, maintain context throughout long conversations, and adapt its communication style to match user preferences. Whether you're a student seeking homework help, a professional drafting emails, or a creative writer looking for inspiration, ChatGPT provides tailored assistance that feels natural and intuitive.
-
-The platform continues to evolve with regular updates, new features, and improved capabilities, making it an indispensable tool for millions of users worldwide.`,
-    logo: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=100&h=100&fit=crop",
-    categories: ["Conversational AI", "Content Creation", "Productivity"],
-    rating: 4.7,
-    reviewCount: 15420,
-    viewCount: 2847392,
-    dateAdded: "March 2023",
-    ratingDistribution: {
-      5: 9250,
-      4: 4120,
-      3: 1580,
-      2: 320,
-      1: 150
-    },
-    features: [
-      {
-        name: "Natural Language Processing",
-        description: "Advanced understanding of human language with context awareness and nuanced responses"
-      },
-      {
-        name: "Multi-Domain Expertise",
-        description: "Knowledgeable across various fields including science, technology, arts, and humanities"
-      },
-      {
-        name: "Code Generation",
-        description: "Capable of writing, debugging, and explaining code in multiple programming languages"
-      },
-      {
-        name: "Creative Writing",
-        description: "Assists with creative tasks like storytelling, poetry, and content ideation"
-      },
-      {
-        name: "Problem Solving",
-        description: "Analytical thinking and step-by-step problem breakdown for complex queries"
-      },
-      {
-        name: "Language Translation",
-        description: "Supports translation and communication across multiple languages"
-      }
-    ],
-    useCases: [
-      {
-        title: "Content Creation",
-        description: "Generate articles, blog posts, marketing copy, and creative content"
-      },
-      {
-        title: "Education & Learning",
-        description: "Tutoring, homework assistance, and concept explanations"
-      },
-      {
-        title: "Programming Help",
-        description: "Code writing, debugging, and technical documentation"
-      },
-      {
-        title: "Business Communication",
-        description: "Email drafting, meeting summaries, and professional correspondence"
-      }
-    ],
-    platforms: ["Web Browser", "iOS App", "Android App", "API"],
-    integrations: ["Microsoft Teams", "Slack", "Discord", "Zapier", "API Integration"],
-    pricing: {
-      type: "freemium",
-      tiers: [
-        {
-          name: "Free",
-          price: 0,
-          period: null,
-          description: "Basic access to ChatGPT with standard response times",
-          features: [
-            "Access to GPT-3.5 model",
-            "Standard response speed",
-            "Basic conversation history",
-            "Community support"
-          ],
-          cta: "Get Started Free",
-          popular: false
-        },
-        {
-          name: "ChatGPT Plus",
-          price: 20,
-          period: "month",
-          description: "Enhanced experience with GPT-4 access and priority support",
-          features: [
-            "Access to GPT-4 model",
-            "Faster response times",
-            "Priority access during peak times",
-            "Extended conversation history",
-            "Early access to new features",
-            "Premium support"
-          ],
-          cta: "Upgrade to Plus",
-          popular: true
-        },
-        {
-          name: "Enterprise",
-          price: "Custom",
-          period: null,
-          description: "Tailored solutions for large organizations with advanced security",
-          features: [
-            "Custom model training",
-            "Advanced security features",
-            "Dedicated support team",
-            "API access with higher limits",
-            "Custom integrations",
-            "SLA guarantees"
-          ],
-          cta: "Contact Sales",
-          popular: false
-        }
-      ],
-      notes: [
-        "All plans include basic conversation capabilities",
-        "Enterprise pricing varies based on usage and requirements",
-        "Educational discounts available for students and teachers",
-        "API usage billed separately based on token consumption"
-      ]
-    },
-    reviews: [
-      {
-        userName: "Sarah Chen",
-        rating: 5,
-        date: "2 days ago",
-        comment: "Absolutely game-changing for my content creation workflow. The quality of responses is consistently impressive, and it saves me hours of research and writing time.",
-        helpfulCount: 24
-      },
-      {
-        userName: "Michael Rodriguez",
-        rating: 4,
-        date: "1 week ago",
-        comment: "Great tool for coding assistance. It helps me debug issues quickly and explains complex concepts well. Sometimes the responses can be a bit verbose, but overall very helpful.",
-        helpfulCount: 18
-      },
-      {
-        userName: "Emily Johnson",
-        rating: 5,
-        date: "2 weeks ago",
-        comment: "As a teacher, this has revolutionized how I create lesson plans and educational materials. The ability to adapt content for different grade levels is fantastic.",
-        helpfulCount: 31
-      },
-      {
-        userName: "David Park",
-        rating: 4,
-        date: "3 weeks ago",
-        comment: "Solid AI assistant with impressive capabilities. The free tier is quite generous, and the Plus subscription is worth it for the GPT-4 access.",
-        helpfulCount: 12
-      }
-    ]
-  };
-
-  const mockRelatedTools = [
-    {
-      id: "2",
-      name: "Claude",
-      shortDescription: "Anthropic's AI assistant focused on helpful, harmless, and honest interactions",
-      logo: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?w=100&h=100&fit=crop",
-      rating: 4.5,
-      viewCount: 1250000
-    },
-    {
-      id: "3",
-      name: "Jasper AI",
-      shortDescription: "AI writing assistant specialized in marketing copy and content creation",
-      logo: "https://images.pixabay.com/photo/2023/04/06/15/50/ai-generated-7904344_1280.jpg?w=100&h=100&fit=crop",
-      rating: 4.3,
-      viewCount: 890000
-    },
-    {
-      id: "4",
-      name: "Copy.ai",
-      shortDescription: "AI-powered copywriting tool for marketing and sales content",
-      logo: "https://images.unsplash.com/photo-1676299081847-824916de030a?w=100&h=100&fit=crop",
-      rating: 4.2,
-      viewCount: 650000
-    },
-    {
-      id: "5",
-      name: "Writesonic",
-      shortDescription: "AI writing platform for articles, ads, and marketing content",
-      logo: "https://images.pexels.com/photos/8386434/pexels-photo-8386434.jpeg?w=100&h=100&fit=crop",
-      rating: 4.1,
-      viewCount: 520000
-    }
-  ];
+  const { user, userProfile } = useAuth();
+  const isAuthenticated = !!user;
 
   useEffect(() => {
-    // Simulate loading
-    setIsLoading(true);
-    
-    const timer = setTimeout(() => {
-      setTool(mockTool);
-      setRelatedTools(mockRelatedTools);
-      setIsLoading(false);
-      
-      // Increment view count with debouncing
-      incrementViewCount(toolId);
-    }, 800);
+    let isMounted = true;
 
-    return () => clearTimeout(timer);
-  }, [toolId]);
+    const loadToolData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Load tool details
+        const toolResult = await toolsService.getTool(toolId);
+        
+        if (!toolResult.success) {
+          if (isMounted) {
+            setError(toolResult.error || 'Tool not found');
+          }
+          return;
+        }
+
+        if (isMounted) {
+          const toolData = toolResult.data;
+          setTool(toolData);
+
+          // Load related tools
+          if (toolData.category) {
+            const relatedResult = await toolsService.getRelatedTools(toolData.id, toolData.category, 4);
+            if (relatedResult.success) {
+              setRelatedTools(relatedResult.data || []);
+            }
+          }
+
+          // Load user rating if authenticated
+          if (user?.id) {
+            const ratingResult = await ratingsService.getUserRating(user.id, toolData.id);
+            if (ratingResult.success && ratingResult.data) {
+              setUserRating(ratingResult.data.rating);
+            }
+          }
+
+          // Increment view count with debouncing
+          incrementViewCount(toolData.id);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError('Failed to load tool details');
+          console.error('Error loading tool:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadToolData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [toolId, user?.id]);
 
   useEffect(() => {
     // Check if tool is bookmarked
     const bookmarks = JSON.parse(localStorage.getItem('aivibesphere-bookmarks') || '[]');
     setIsBookmarked(bookmarks.includes(toolId));
-    
-    // Check user authentication status
-    const authStatus = localStorage.getItem('aivibesphere-auth');
-    setIsAuthenticated(!!authStatus);
-    
-    // Check if user has rated this tool
-    const userRatings = JSON.parse(localStorage.getItem('aivibesphere-ratings') || '{}');
-    setUserRating(userRatings[toolId] || null);
   }, [toolId]);
 
   const incrementViewCount = (id) => {
@@ -256,8 +103,7 @@ The platform continues to evolve with regular updates, new features, and improve
     
     if (!lastViewed || now - parseInt(lastViewed) > 60000) { // 1 minute debounce
       localStorage.setItem(viewKey, now.toString());
-      // In real app, this would make an API call
-      console.log(`View count incremented for tool ${id}`);
+      toolsService.incrementViewCount(id);
     }
   };
 
@@ -281,39 +127,158 @@ The platform continues to evolve with regular updates, new features, and improve
     const result = addToComparison({
       id: tool.id,
       name: tool.name,
-      logo: tool.logo,
-      rating: tool.rating,
-      categories: tool.categories
+      logo: tool.logo_url,
+      rating: tool.average_rating,
+      category: tool.category,
+      description: tool.description
     });
     
     if (result.success) {
-      // Show success message or toast
       console.log('Added to comparison successfully');
     } else {
-      // Show error message
       console.log(result.message);
     }
   };
 
   const handleSubmitRating = async (ratingData) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Save rating to localStorage
-    const userRatings = JSON.parse(localStorage.getItem('aivibesphere-ratings') || '{}');
-    userRatings[toolId] = ratingData.rating;
-    localStorage.setItem('aivibesphere-ratings', JSON.stringify(userRatings));
-    
-    setUserRating(ratingData.rating);
-    
-    // Update tool rating (in real app, this would be handled by backend)
-    console.log('Rating submitted:', ratingData);
+    if (!user?.id || !tool?.id) return;
+
+    try {
+      const result = await ratingsService.submitRating(
+        user.id,
+        tool.id,
+        ratingData.rating,
+        ratingData.comment
+      );
+
+      if (result.success) {
+        setUserRating(ratingData.rating);
+        
+        // Update tool rating optimistically
+        setTool(prev => ({
+          ...prev,
+          average_rating: ((prev.average_rating || 0) * (prev.rating_count || 0) + ratingData.rating) / ((prev.rating_count || 0) + 1),
+          rating_count: (prev.rating_count || 0) + 1
+        }));
+      } else {
+        throw new Error(result.error || 'Failed to submit rating');
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      throw error;
+    }
   };
+
+  // Transform database tool data to component-expected format
+  const getTransformedTool = () => {
+    if (!tool) return null;
+
+    return {
+      ...tool,
+      categories: [tool.category],
+      rating: tool.average_rating || 0,
+      reviewCount: tool.rating_count || 0,
+      viewCount: tool.view_count || 0,
+      dateAdded: tool.created_at ? new Date(tool.created_at).toLocaleDateString() : 'Unknown',
+      shortDescription: tool.description,
+      fullDescription: tool.description,
+      additionalInfo: `${tool.name} is a powerful ${tool.category} tool that helps users achieve their goals with advanced features and intuitive design.`,
+      logo: tool.logo_url,
+      websiteUrl: tool.referral_url,
+      useCases: [
+        {
+          title: 'Professional Use',
+          description: `Perfect for professionals working in ${tool.category} who need reliable and efficient tools.`
+        },
+        {
+          title: 'Team Collaboration',
+          description: 'Ideal for teams looking to streamline their workflow and improve productivity.'
+        },
+        {
+          title: 'Small Business',
+          description: 'Great solution for small businesses seeking cost-effective tools.'
+        },
+        {
+          title: 'Enterprise',
+          description: 'Scalable solution suitable for large organizations with complex requirements.'
+        }
+      ],
+      features: (tool.features || []).map(feature => ({
+        name: feature,
+        description: `Advanced ${feature.toLowerCase()} capabilities`
+      })),
+      platforms: ['Web Browser', 'API', 'Mobile App'],
+      integrations: ['Slack', 'Discord', 'Zapier', 'API'],
+      pricing: {
+        type: tool.pricing_type || 'freemium',
+        tiers: [
+          {
+            name: 'Free',
+            price: 0,
+            period: null,
+            description: 'Basic features for getting started',
+            features: ['Basic functionality', 'Limited usage', 'Community support'],
+            cta: 'Get Started Free',
+            popular: false
+          },
+          {
+            name: 'Pro',
+            price: tool.pricing_type === 'paid' ? 29 : 19,
+            period: 'month',
+            description: 'Full features for professionals',
+            features: ['All features', 'Unlimited usage', 'Priority support', 'Advanced analytics'],
+            cta: 'Upgrade to Pro',
+            popular: true
+          },
+          {
+            name: 'Enterprise',
+            price: 'Custom',
+            period: null,
+            description: 'Custom solutions for large teams',
+            features: ['Custom integrations', 'Dedicated support', 'SLA guarantees', 'Advanced security'],
+            cta: 'Contact Sales',
+            popular: false
+          }
+        ],
+        notes: [
+          'All plans include basic features',
+          'No setup fees or hidden costs',
+          'Cancel anytime with full refund policy',
+          'Volume discounts available for teams'
+        ]
+      },
+      reviews: [
+        {
+          userName: 'Demo User',
+          rating: 5,
+          date: '1 week ago',
+          comment: `${tool.name} has been incredibly helpful for my ${tool.category} needs. Highly recommended!`,
+          helpfulCount: 12
+        },
+        {
+          userName: 'Professional User',
+          rating: 4,
+          date: '2 weeks ago',
+          comment: 'Great tool with excellent features. The interface could be improved but overall very satisfied.',
+          helpfulCount: 8
+        }
+      ],
+      ratingDistribution: {
+        5: Math.floor((tool.rating_count || 0) * 0.6),
+        4: Math.floor((tool.rating_count || 0) * 0.25),
+        3: Math.floor((tool.rating_count || 0) * 0.1),
+        2: Math.floor((tool.rating_count || 0) * 0.03),
+        1: Math.floor((tool.rating_count || 0) * 0.02)
+      }
+    };
+  };
+
+  const transformedTool = getTransformedTool();
 
   const breadcrumbItems = [
     { label: 'Home', path: '/homepage', icon: 'Home' },
     { label: 'Tools', path: '/category-listing-page', icon: 'Grid3X3' },
-    { label: tool?.name || 'Tool Details', path: null, icon: 'Info', isLast: true }
+    { label: transformedTool?.name || 'Tool Details', path: null, icon: 'Info', isLast: true }
   ];
 
   if (isLoading) {
@@ -352,7 +317,7 @@ The platform continues to evolve with regular updates, new features, and improve
     );
   }
 
-  if (!tool) {
+  if (error || !transformedTool) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -362,7 +327,7 @@ The platform continues to evolve with regular updates, new features, and improve
               <Icon name="AlertCircle" size={64} className="text-text-muted mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-text-primary mb-2">Tool Not Found</h1>
               <p className="text-text-secondary mb-6">
-                The tool you're looking for doesn't exist or has been removed.
+                {error || "The tool you're looking for doesn't exist or has been removed."}
               </p>
               <button
                 onClick={() => navigate('/category-listing-page')}
@@ -391,11 +356,11 @@ The platform continues to evolve with regular updates, new features, and improve
           
           {/* Tool Hero Section */}
           <ToolHero
-            tool={tool}
+            tool={transformedTool}
             onBookmark={handleBookmark}
             isBookmarked={isBookmarked}
             onAddToComparison={handleAddToComparison}
-            isInComparison={isInComparison(tool.id)}
+            isInComparison={isInComparison(transformedTool.id)}
           />
           
           {/* Main Content Grid */}
@@ -403,11 +368,11 @@ The platform continues to evolve with regular updates, new features, and improve
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Tool Tabs */}
-              <ToolTabs tool={tool} />
+              <ToolTabs tool={transformedTool} />
               
               {/* Rating System */}
               <RatingSystem
-                tool={tool}
+                tool={transformedTool}
                 onSubmitRating={handleSubmitRating}
                 userRating={userRating}
                 isAuthenticated={isAuthenticated}
@@ -418,8 +383,14 @@ The platform continues to evolve with regular updates, new features, and improve
             <div className="space-y-8">
               {/* Related Tools */}
               <RelatedTools
-                tools={relatedTools}
-                currentToolId={tool.id}
+                tools={relatedTools.map(relatedTool => ({
+                  ...relatedTool,
+                  logo: relatedTool.logo_url,
+                  shortDescription: relatedTool.description,
+                  rating: relatedTool.average_rating || 0,
+                  viewCount: relatedTool.view_count || 0
+                }))}
+                currentToolId={transformedTool.id}
               />
               
               {/* Sidebar Ads */}

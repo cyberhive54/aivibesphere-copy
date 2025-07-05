@@ -8,8 +8,8 @@ import SortControls from './components/SortControls';
 import ActiveFilters from './components/ActiveFilters';
 import ToolGrid from './components/ToolGrid';
 import BannerAd from './components/BannerAd';
-
 import Button from '../../components/ui/Button';
+import toolsService from '../../utils/toolsService';
 
 const CategoryListingPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +22,7 @@ const CategoryListingPage = () => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState(null);
   
   // Filter and sort state
   const [filters, setFilters] = useState({
@@ -39,245 +40,118 @@ const CategoryListingPage = () => {
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'recent');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
-  // Mock data
+  // Categories mapping from database enum to display names
   const categories = [
-    { id: 1, name: 'Content Creation', slug: 'content-creation' },
-    { id: 2, name: 'Data Analysis', slug: 'data-analysis' },
-    { id: 3, name: 'Image Generation', slug: 'image-generation' },
-    { id: 4, name: 'Code Assistant', slug: 'code-assistant' },
-    { id: 5, name: 'Marketing', slug: 'marketing' },
-    { id: 6, name: 'Customer Service', slug: 'customer-service' },
-    { id: 7, name: 'Productivity', slug: 'productivity' },
-    { id: 8, name: 'Design', slug: 'design' },
-    { id: 9, name: 'Video Editing', slug: 'video-editing' },
-    { id: 10, name: 'Voice & Audio', slug: 'voice-audio' }
+    { id: 'productivity', name: 'Productivity', slug: 'productivity' },
+    { id: 'design', name: 'Design', slug: 'design' },
+    { id: 'writing', name: 'Writing', slug: 'writing' },
+    { id: 'coding', name: 'Coding', slug: 'coding' },
+    { id: 'marketing', name: 'Marketing', slug: 'marketing' },
+    { id: 'sales', name: 'Sales', slug: 'sales' },
+    { id: 'analytics', name: 'Analytics', slug: 'analytics' },
+    { id: 'video', name: 'Video', slug: 'video' },
+    { id: 'audio', name: 'Audio', slug: 'audio' },
+    { id: 'image', name: 'Image', slug: 'image' },
+    { id: 'chatbot', name: 'Chatbot', slug: 'chatbot' },
+    { id: 'automation', name: 'Automation', slug: 'automation' },
+    { id: 'business', name: 'Business', slug: 'business' },
+    { id: 'education', name: 'Education', slug: 'education' },
+    { id: 'finance', name: 'Finance', slug: 'finance' },
+    { id: 'research', name: 'Research', slug: 'research' }
   ];
 
-  const mockTools = [
-    {
-      id: 1,
-      name: "GPT-4 Turbo",
-      description: "Advanced language model for content creation, coding, and complex reasoning tasks with improved accuracy and speed.",
-      category: "Content Creation",
-      logo: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop",
-      rating: 4.8,
-      reviewCount: 2847,
-      viewCount: 125430,
-      pricing: { type: 'paid', startingPrice: 20, billingCycle: 'month' },
-      features: ["Natural Language Processing", "Code Generation", "Multi-language Support", "API Integration"],
-      websiteUrl: "https://openai.com/gpt-4",
-      isNew: true,
-      dateAdded: new Date('2024-01-15')
-    },
-    {
-      id: 2,
-      name: "Midjourney",
-      description: "AI-powered image generation tool that creates stunning artwork and designs from text prompts with artistic flair.",
-      category: "Image Generation",
-      logo: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=300&fit=crop",
-      rating: 4.6,
-      reviewCount: 1923,
-      viewCount: 98765,
-      pricing: { type: 'subscription', startingPrice: 10, billingCycle: 'month' },
-      features: ["Text-to-Image", "Style Transfer", "High Resolution", "Commercial License"],
-      websiteUrl: "https://midjourney.com",
-      isNew: false,
-      dateAdded: new Date('2023-12-20')
-    },
-    {
-      id: 3,
-      name: "GitHub Copilot",
-      description: "AI pair programmer that helps you write code faster with intelligent suggestions and auto-completion.",
-      category: "Code Assistant",
-      logo: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop",
-      rating: 4.5,
-      reviewCount: 3456,
-      viewCount: 156789,
-      pricing: { type: 'subscription', startingPrice: 10, billingCycle: 'month' },
-      features: ["Code Completion", "Multi-language Support", "IDE Integration", "Context Awareness"],
-      websiteUrl: "https://github.com/features/copilot",
-      isNew: false,
-      dateAdded: new Date('2023-11-10')
-    },
-    {
-      id: 4,
-      name: "Tableau AI",
-      description: "Advanced data visualization and analytics platform with AI-powered insights and automated chart generation.",
-      category: "Data Analysis",
-      logo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
-      rating: 4.4,
-      reviewCount: 1567,
-      viewCount: 87432,
-      pricing: { type: 'subscription', startingPrice: 75, billingCycle: 'month' },
-      features: ["Data Visualization", "Predictive Analytics", "Dashboard Creation", "Real-time Updates"],
-      websiteUrl: "https://tableau.com",
-      isNew: false,
-      dateAdded: new Date('2023-10-25')
-    },
-    {
-      id: 5,
-      name: "Jasper AI",
-      description: "AI writing assistant that helps create high-quality content for blogs, ads, emails, and social media posts.",
-      category: "Content Creation",
-      logo: "https://images.unsplash.com/photo-1486312338219-ce68e2c6b7d3?w=400&h=300&fit=crop",
-      rating: 4.3,
-      reviewCount: 2134,
-      viewCount: 76543,
-      pricing: { type: 'subscription', startingPrice: 29, billingCycle: 'month' },
-      features: ["Content Generation", "SEO Optimization", "Brand Voice", "Plagiarism Checker"],
-      websiteUrl: "https://jasper.ai",
-      isNew: false,
-      dateAdded: new Date('2023-09-15')
-    },
-    {
-      id: 6,
-      name: "Canva AI",
-      description: "Design platform with AI-powered features for creating professional graphics, presentations, and marketing materials.",
-      category: "Design",
-      logo: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-      rating: 4.7,
-      reviewCount: 4321,
-      viewCount: 234567,
-      pricing: { type: 'freemium', startingPrice: 15, billingCycle: 'month' },
-      features: ["Template Library", "AI Design Assistant", "Brand Kit", "Collaboration Tools"],
-      websiteUrl: "https://canva.com",
-      isNew: false,
-      dateAdded: new Date('2023-08-30')
-    },
-    {
-      id: 7,
-      name: "HubSpot AI",
-      description: "Marketing automation platform with AI-powered lead scoring, email optimization, and customer insights.",
-      category: "Marketing",
-      logo: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
-      rating: 4.2,
-      reviewCount: 1876,
-      viewCount: 65432,
-      pricing: { type: 'freemium', startingPrice: 50, billingCycle: 'month' },
-      features: ["Lead Scoring", "Email Automation", "CRM Integration", "Analytics Dashboard"],
-      websiteUrl: "https://hubspot.com",
-      isNew: false,
-      dateAdded: new Date('2023-07-20')
-    },
-    {
-      id: 8,
-      name: "Zendesk AI",
-      description: "Customer service platform with AI chatbots, sentiment analysis, and automated ticket routing.",
-      category: "Customer Service",
-      logo: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
-      rating: 4.1,
-      reviewCount: 987,
-      viewCount: 45678,
-      pricing: { type: 'subscription', startingPrice: 19, billingCycle: 'month' },
-      features: ["AI Chatbots", "Sentiment Analysis", "Ticket Routing", "Knowledge Base"],
-      websiteUrl: "https://zendesk.com",
-      isNew: false,
-      dateAdded: new Date('2023-06-10')
-    },
-    {
-      id: 9,
-      name: "Notion AI",
-      description: "All-in-one workspace with AI writing assistant, content generation, and intelligent organization features.",
-      category: "Productivity",
-      logo: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=300&fit=crop",
-      rating: 4.5,
-      reviewCount: 3210,
-      viewCount: 123456,
-      pricing: { type: 'freemium', startingPrice: 8, billingCycle: 'month' },
-      features: ["AI Writing", "Database Management", "Template Library", "Team Collaboration"],
-      websiteUrl: "https://notion.so",
-      isNew: true,
-      dateAdded: new Date('2024-01-05')
-    },
-    {
-      id: 10,
-      name: "RunwayML",
-      description: "AI-powered video editing platform with advanced effects, background removal, and content generation.",
-      category: "Video Editing",
-      logo: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop",
-      rating: 4.4,
-      reviewCount: 1543,
-      viewCount: 67890,
-      pricing: { type: 'subscription', startingPrice: 15, billingCycle: 'month' },
-      features: ["AI Video Effects", "Background Removal", "Motion Tracking", "Real-time Processing"],
-      websiteUrl: "https://runwayml.com",
-      isNew: false,
-      dateAdded: new Date('2023-05-15')
-    },
-    {
-      id: 11,
-      name: "ElevenLabs",
-      description: "Advanced AI voice synthesis and cloning platform for creating realistic speech from text input.",
-      category: "Voice & Audio",
-      logo: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=300&fit=crop",
-      rating: 4.6,
-      reviewCount: 876,
-      viewCount: 54321,
-      pricing: { type: 'freemium', startingPrice: 5, billingCycle: 'month' },
-      features: ["Voice Cloning", "Text-to-Speech", "Multi-language", "API Access"],
-      websiteUrl: "https://elevenlabs.io",
-      isNew: true,
-      dateAdded: new Date('2024-01-20')
-    },
-    {
-      id: 12,
-      name: "Grammarly AI",
-      description: "Writing assistant with advanced grammar checking, style suggestions, and tone detection powered by AI.",
-      category: "Content Creation",
-      logo: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=300&fit=crop",
-      rating: 4.3,
-      reviewCount: 5432,
-      viewCount: 198765,
-      pricing: { type: 'freemium', startingPrice: 12, billingCycle: 'month' },
-      features: ["Grammar Check", "Style Suggestions", "Tone Detection", "Plagiarism Detection"],
-      websiteUrl: "https://grammarly.com",
-      isNew: false,
-      dateAdded: new Date('2023-04-10')
-    }
-  ];
-
-  // Initialize tools data
+  // Load tools from database
   useEffect(() => {
+    let isMounted = true;
+
     const loadTools = async () => {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setTools(mockTools);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Build filters for API call
+        const apiFilters = {};
+        
+        if (filters.category) {
+          apiFilters.category = filters.category;
+        }
+        
+        if (searchQuery) {
+          apiFilters.search = searchQuery;
+        }
+        
+        if (filters.minRating > 0) {
+          apiFilters.minRating = filters.minRating;
+        }
+
+        // Set sorting
+        let sortKey = 'created_at';
+        switch (sortBy) {
+          case 'name-asc':
+          case 'name-desc':
+            sortKey = 'name';
+            break;
+          case 'rating-desc':
+          case 'rating-asc':
+            sortKey = 'rating';
+            break;
+          case 'views-desc':
+            sortKey = 'views';
+            break;
+          case 'reviews-desc':
+            sortKey = 'reviews';
+            break;
+          default:
+            sortKey = 'newest';
+        }
+        
+        apiFilters.sortBy = sortKey;
+        apiFilters.limit = 50; // Load more tools
+
+        const result = await toolsService.getTools(apiFilters);
+
+        if (result.success && isMounted) {
+          setTools(result.data || []);
+        } else if (isMounted) {
+          setError(result.error || 'Failed to load tools');
+          setTools([]);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError('Failed to load tools');
+          setTools([]);
+          console.error('Error loading tools:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     };
 
     loadTools();
-  }, []);
 
-  // Filter and sort tools
+    return () => {
+      isMounted = false;
+    };
+  }, [filters.category, searchQuery, filters.minRating, sortBy]);
+
+  // Apply client-side filtering (for filters not supported by API)
   useEffect(() => {
     let filtered = [...tools];
-
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(tool =>
-        tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tool.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Apply category filter
-    if (filters.category) {
-      filtered = filtered.filter(tool =>
-        tool.category.toLowerCase().replace(/\s+/g, '-') === filters.category
-      );
-    }
-
-    // Apply rating filter
-    if (filters.minRating > 0) {
-      filtered = filtered.filter(tool => tool.rating >= filters.minRating);
-    }
 
     // Apply price range filter
     if (filters.priceRange.min !== null || filters.priceRange.max !== null) {
       filtered = filtered.filter(tool => {
-        const price = tool.pricing?.startingPrice || 0;
+        // Extract price from price_info string or assume 0 for free
+        let price = 0;
+        if (tool.price_info && tool.pricing_type !== 'free') {
+          const priceMatch = tool.price_info.match(/\$(\d+)/);
+          if (priceMatch) {
+            price = parseInt(priceMatch[1]);
+          }
+        }
+        
         const min = filters.priceRange.min || 0;
         const max = filters.priceRange.max || Infinity;
         return price >= min && price <= max;
@@ -286,20 +160,20 @@ const CategoryListingPage = () => {
 
     // Apply pricing type filter
     if (filters.pricingType) {
-      filtered = filtered.filter(tool => tool.pricing?.type === filters.pricingType);
+      filtered = filtered.filter(tool => tool.pricing_type === filters.pricingType);
     }
 
     // Apply most viewed filter
     if (filters.mostViewed) {
-      filtered = filtered.filter(tool => tool.viewCount > 50000);
+      filtered = filtered.filter(tool => (tool.view_count || 0) > 50000);
     }
 
     // Apply minimum reviews filter
     if (filters.minReviews > 0) {
-      filtered = filtered.filter(tool => tool.reviewCount >= filters.minReviews);
+      filtered = filtered.filter(tool => (tool.rating_count || 0) >= filters.minReviews);
     }
 
-    // Apply sorting
+    // Apply client-side sorting for cases not handled by API
     switch (sortBy) {
       case 'name-asc':
         filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -307,26 +181,21 @@ const CategoryListingPage = () => {
       case 'name-desc':
         filtered.sort((a, b) => b.name.localeCompare(a.name));
         break;
-      case 'rating-desc':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
       case 'rating-asc':
-        filtered.sort((a, b) => a.rating - b.rating);
-        break;
-      case 'views-desc':
-        filtered.sort((a, b) => b.viewCount - a.viewCount);
+        filtered.sort((a, b) => (a.average_rating || 0) - (b.average_rating || 0));
         break;
       case 'reviews-desc':
-        filtered.sort((a, b) => b.reviewCount - a.reviewCount);
+        filtered.sort((a, b) => (b.rating_count || 0) - (a.rating_count || 0));
         break;
-      case 'recent':
-      default:
-        filtered.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+      case 'views-desc':
+        filtered.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
         break;
+      // API handles: recent, rating-desc by default
     }
 
     setFilteredTools(filtered);
-  }, [tools, filters, sortBy, searchQuery]);
+    setHasMore(false); // Disable pagination for now since we load all tools
+  }, [tools, filters, sortBy]);
 
   // Update URL params when filters change
   useEffect(() => {
@@ -398,11 +267,14 @@ const CategoryListingPage = () => {
   }, []);
 
   const handleViewTool = useCallback((toolId) => {
-    // Simulate view count increment
+    // Increment view count
+    toolsService.incrementViewCount(toolId);
+    
+    // Update local state optimistically
     setTools(prevTools =>
       prevTools.map(tool =>
         tool.id === toolId
-          ? { ...tool, viewCount: tool.viewCount + 1 }
+          ? { ...tool, view_count: (tool.view_count || 0) + 1 }
           : tool
       )
     );
@@ -410,8 +282,7 @@ const CategoryListingPage = () => {
 
   const handleLoadMore = useCallback(() => {
     setCurrentPage(prev => prev + 1);
-    // In a real app, this would load more data
-    // For now, we'll just simulate it
+    // In a real app with pagination, this would load more data
     setHasMore(false);
   }, []);
 
@@ -434,6 +305,34 @@ const CategoryListingPage = () => {
     { label: 'Home', path: '/homepage', icon: 'Home' },
     { label: 'Categories', path: '/category-listing-page', icon: 'Grid3X3', isLast: true }
   ];
+
+  // Error state
+  if (error && !isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-12 h-12 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-text-primary mb-2">Failed to Load Tools</h3>
+              <p className="text-text-secondary mb-4">{error}</p>
+              <Button
+                variant="primary"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

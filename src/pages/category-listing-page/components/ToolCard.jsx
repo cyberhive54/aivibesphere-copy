@@ -33,21 +33,37 @@ const ToolCard = ({ tool, onViewTool }) => {
   };
 
   const getPricingDisplay = () => {
-    if (tool.pricing?.type === 'free') return 'Free';
-    if (tool.pricing?.type === 'freemium') return 'Freemium';
-    if (tool.pricing?.startingPrice) {
-      return `$${tool.pricing.startingPrice}${tool.pricing.billingCycle ? `/${tool.pricing.billingCycle}` : ''}`;
+    if (tool.pricing_type === 'free') return 'Free';
+    if (tool.pricing_type === 'freemium') return 'Freemium';
+    if (tool.price_info) {
+      // Try to extract price from price_info
+      const priceMatch = tool.price_info.match(/\$(\d+)/);
+      if (priceMatch) {
+        const billingMatch = tool.price_info.match(/(month|year|one-time)/i);
+        return `$${priceMatch[1]}${billingMatch ? `/${billingMatch[1]}` : ''}`;
+      }
+      return tool.price_info;
     }
     return 'Contact for pricing';
   };
 
   const getPricingColor = () => {
-    switch (tool.pricing?.type) {
+    switch (tool.pricing_type) {
       case 'free': return 'text-success';
       case 'freemium': return 'text-accent';
+      case 'paid': return 'text-warning';
+      case 'one_time': return 'text-secondary';
       default: return 'text-text-primary';
     }
   };
+
+  // Convert database features array to displayable format
+  const getDisplayFeatures = () => {
+    if (!tool.features || !Array.isArray(tool.features)) return [];
+    return tool.features.slice(0, 3); // Show max 3 features
+  };
+
+  const displayFeatures = getDisplayFeatures();
 
   return (
     <div className="neumorphic-card bg-surface hover:shadow-elevated smooth-transition-slow group">
@@ -55,7 +71,7 @@ const ToolCard = ({ tool, onViewTool }) => {
         {/* Tool Image */}
         <div className="relative overflow-hidden rounded-t-lg h-48 bg-background">
           <Image
-            src={tool.logo || tool.image}
+            src={tool.logo_url || 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop'}
             alt={`${tool.name} logo`}
             className={`w-full h-full object-cover smooth-transition ${
               isImageLoaded ? 'opacity-100' : 'opacity-0'
@@ -72,7 +88,7 @@ const ToolCard = ({ tool, onViewTool }) => {
           
           {/* Category Badge */}
           <div className="absolute top-3 left-3">
-            <span className="bg-primary/90 text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+            <span className="bg-primary/90 text-primary-foreground text-xs px-2 py-1 rounded-full font-medium capitalize">
               {tool.category}
             </span>
           </div>
@@ -92,11 +108,11 @@ const ToolCard = ({ tool, onViewTool }) => {
             />
           </div>
 
-          {/* New Badge */}
-          {tool.isNew && (
+          {/* Featured Badge */}
+          {tool.is_featured && (
             <div className="absolute bottom-3 left-3">
               <span className="bg-accent text-accent-foreground text-xs px-2 py-1 rounded-full font-medium">
-                New
+                Featured
               </span>
             </div>
           )}
@@ -125,19 +141,19 @@ const ToolCard = ({ tool, onViewTool }) => {
                     name="Star"
                     size={14}
                     className={
-                      star <= Math.floor(tool.rating || 0)
+                      star <= Math.floor(tool.average_rating || 0)
                         ? 'text-yellow-400 fill-current'
-                        : star <= (tool.rating || 0)
+                        : star <= (tool.average_rating || 0)
                         ? 'text-yellow-400 fill-current opacity-50' :'text-text-muted'
                     }
                   />
                 ))}
               </div>
               <span className="text-sm text-text-secondary">
-                {tool.rating ? tool.rating.toFixed(1) : '0.0'}
+                {tool.average_rating ? tool.average_rating.toFixed(1) : '0.0'}
               </span>
               <span className="text-xs text-text-muted">
-                ({tool.reviewCount || 0})
+                ({tool.rating_count || 0})
               </span>
             </div>
 
@@ -145,7 +161,7 @@ const ToolCard = ({ tool, onViewTool }) => {
             <div className="flex items-center space-x-1 text-text-muted">
               <Icon name="Eye" size={14} />
               <span className="text-xs">
-                {tool.viewCount ? tool.viewCount.toLocaleString() : '0'}
+                {tool.view_count ? tool.view_count.toLocaleString() : '0'}
               </span>
             </div>
           </div>
@@ -158,10 +174,10 @@ const ToolCard = ({ tool, onViewTool }) => {
           </div>
 
           {/* Features Preview */}
-          {tool.features && tool.features.length > 0 && (
+          {displayFeatures.length > 0 && (
             <div className="mb-4">
               <div className="flex flex-wrap gap-1">
-                {tool.features.slice(0, 3).map((feature, index) => (
+                {displayFeatures.map((feature, index) => (
                   <span
                     key={index}
                     className="text-xs bg-background text-text-secondary px-2 py-1 rounded border border-border"
@@ -169,7 +185,7 @@ const ToolCard = ({ tool, onViewTool }) => {
                     {feature}
                   </span>
                 ))}
-                {tool.features.length > 3 && (
+                {tool.features && tool.features.length > 3 && (
                   <span className="text-xs text-text-muted">
                     +{tool.features.length - 3} more
                   </span>
@@ -186,7 +202,7 @@ const ToolCard = ({ tool, onViewTool }) => {
               className="text-sm"
               onClick={(e) => {
                 e.preventDefault();
-                window.open(tool.websiteUrl, '_blank');
+                window.open(tool.referral_url, '_blank');
               }}
             >
               Visit Website
@@ -197,7 +213,7 @@ const ToolCard = ({ tool, onViewTool }) => {
               className="flex-shrink-0"
               onClick={(e) => {
                 e.preventDefault();
-                window.open(tool.websiteUrl, '_blank');
+                window.open(tool.referral_url, '_blank');
               }}
             />
           </div>
