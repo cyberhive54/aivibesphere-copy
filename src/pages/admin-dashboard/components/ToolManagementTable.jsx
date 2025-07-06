@@ -3,6 +3,7 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
+import { ALL_CATEGORIES, getCategoryDisplayName } from '../../../utils/categories';
 
 const ToolManagementTable = ({ tools, onUpdateTool, onDeleteTool }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,8 +12,6 @@ const ToolManagementTable = ({ tools, onUpdateTool, onDeleteTool }) => {
   const [sortField, setSortField] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState('desc');
   const [editingTool, setEditingTool] = useState(null);
-
-  const categories = ['AI Writing', 'Image Generation', 'Code Assistant', 'Data Analysis', 'Chatbot', 'Voice AI', 'Video Generation'];
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -50,17 +49,33 @@ const ToolManagementTable = ({ tools, onUpdateTool, onDeleteTool }) => {
     });
   };
 
-  const getCategoryColor = (category) => {
+  const getCategoryColor = (categorySlug) => {
+    const category = ALL_CATEGORIES.find(cat => cat.slug === categorySlug);
+    if (!category) return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+    
+    // Extract color from gradient for background
+    const colorMatch = category.color.match(/from-(\w+)-500/);
+    const colorName = colorMatch ? colorMatch[1] : 'gray';
+    
     const colors = {
-      'AI Writing': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      'Image Generation': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      'Code Assistant': 'bg-green-500/10 text-green-400 border-green-500/20',
-      'Data Analysis': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      'Chatbot': 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-      'Voice AI': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-      'Video Generation': 'bg-red-500/10 text-red-400 border-red-500/20'
+      'blue': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      'purple': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      'green': 'bg-green-500/10 text-green-400 border-green-500/20',
+      'orange': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+      'pink': 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+      'cyan': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+      'red': 'bg-red-500/10 text-red-400 border-red-500/20',
+      'indigo': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+      'teal': 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+      'yellow': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      'violet': 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+      'slate': 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+      'emerald': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      'amber': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      'rose': 'bg-rose-500/10 text-rose-400 border-rose-500/20'
     };
-    return colors[category] || 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+    
+    return colors[colorName] || 'bg-gray-500/10 text-gray-400 border-gray-500/20';
   };
 
   const getStatusColor = (status) => {
@@ -106,8 +121,8 @@ const ToolManagementTable = ({ tools, onUpdateTool, onDeleteTool }) => {
               className="px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:ring-2 focus:ring-primary focus:border-primary"
             >
               <option value="all">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+              {ALL_CATEGORIES.map(category => (
+                <option key={category.slug} value={category.slug}>{category.name}</option>
               ))}
             </select>
             <select
@@ -214,13 +229,13 @@ const ToolManagementTable = ({ tools, onUpdateTool, onDeleteTool }) => {
                       onChange={(e) => setEditingTool({...editingTool, category: e.target.value})}
                       className="px-2 py-1 bg-background border border-border rounded text-sm text-text-primary"
                     >
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
+                      {ALL_CATEGORIES.map(category => (
+                        <option key={category.slug} value={category.slug}>{category.name}</option>
                       ))}
                     </select>
                   ) : (
                     <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getCategoryColor(tool.category)}`}>
-                      {tool.category}
+                      {getCategoryDisplayName(tool.category)}
                     </span>
                   )}
                 </td>

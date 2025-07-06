@@ -2,26 +2,18 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import { ALL_CATEGORIES } from '../../../utils/categories';
 
 const CategoryChips = () => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  const categories = [
-    { id: 1, name: "AI Writing", icon: "PenTool", count: 245, color: "from-blue-500 to-blue-600" },
-    { id: 2, name: "Image Generation", icon: "Image", count: 189, color: "from-purple-500 to-purple-600" },
-    { id: 3, name: "Chatbots", icon: "MessageCircle", count: 156, color: "from-green-500 to-green-600" },
-    { id: 4, name: "Data Analysis", icon: "BarChart3", count: 134, color: "from-orange-500 to-orange-600" },
-    { id: 5, name: "Video Editing", icon: "Video", count: 98, color: "from-red-500 to-red-600" },
-    { id: 6, name: "Voice & Audio", icon: "Mic", count: 87, color: "from-pink-500 to-pink-600" },
-    { id: 7, name: "Code Assistant", icon: "Code", count: 76, color: "from-indigo-500 to-indigo-600" },
-    { id: 8, name: "Marketing", icon: "TrendingUp", count: 65, color: "from-teal-500 to-teal-600" },
-    { id: 9, name: "Design Tools", icon: "Palette", count: 54, color: "from-yellow-500 to-yellow-600" },
-    { id: 10, name: "Productivity", icon: "Zap", count: 43, color: "from-cyan-500 to-cyan-600" }
-  ];
+  // Use the first 10 categories for display
+  const categories = ALL_CATEGORIES.slice(0, 10);
 
-  const handleCategoryClick = (categoryName) => {
-    navigate(`/category-listing-page?category=${encodeURIComponent(categoryName)}`);
+  const handleCategoryClick = (category) => {
+    // Use the slug (database enum value) for the URL parameter
+    navigate(`/category-listing-page?category=${encodeURIComponent(category.slug)}`);
   };
 
   const scroll = (direction) => {
@@ -74,7 +66,7 @@ const CategoryChips = () => {
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => handleCategoryClick(category.name)}
+                onClick={() => handleCategoryClick(category)}
                 className="flex-shrink-0 group"
               >
                 <div className="neumorphic-card p-6 w-48 sm:w-52 hover:scale-105 smooth-transition">

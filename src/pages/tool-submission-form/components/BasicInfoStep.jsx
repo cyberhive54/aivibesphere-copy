@@ -2,34 +2,22 @@ import React from 'react';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
+import { ALL_CATEGORIES } from '../../../utils/categories';
 
 const BasicInfoStep = ({ formData, updateFormData, errors, onNext }) => {
-  const categories = [
-    "AI Writing", "AI Art & Design", "AI Video", "AI Audio", "AI Coding",
-    "AI Business", "AI Marketing", "AI Analytics", "AI Productivity", "AI Research",
-    "Machine Learning", "Natural Language Processing", "Computer Vision", "Chatbots",
-    "AI Tools", "Data Science", "Automation", "AI Education", "AI Healthcare"
-  ];
-
   const handleInputChange = (field, value) => {
     updateFormData({ [field]: value });
   };
 
-  const handleCategoryToggle = (category) => {
-    const currentCategories = formData.categories || [];
-    const updatedCategories = currentCategories.includes(category)
-      ? currentCategories.filter(cat => cat !== category)
-      : [...currentCategories, category];
-    
-    updateFormData({ categories: updatedCategories });
+  const handleCategoryChange = (categorySlug) => {
+    updateFormData({ category: categorySlug });
   };
 
   const isFormValid = () => {
     return formData.toolName && 
            formData.shortDescription && 
            formData.websiteUrl && 
-           formData.categories && 
-           formData.categories.length > 0;
+           formData.category;
   };
 
   return (
@@ -102,43 +90,36 @@ const BasicInfoStep = ({ formData, updateFormData, errors, onNext }) => {
       <div className="neumorphic-card p-6">
         <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
           <Icon name="Grid3X3" size={20} className="mr-2 text-primary" />
-          Categories *
+          Category *
         </h3>
         
         <p className="text-sm text-text-secondary mb-4">
-          Select all categories that best describe your AI tool (minimum 1, maximum 5)
+          Select the category that best describes your AI tool
         </p>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {categories.map((category) => {
-            const isSelected = (formData.categories || []).includes(category);
+          {ALL_CATEGORIES.map((category) => {
+            const isSelected = formData.category === category.slug;
             return (
               <button
-                key={category}
+                key={category.id}
                 type="button"
-                onClick={() => handleCategoryToggle(category)}
-                disabled={(formData.categories || []).length >= 5 && !isSelected}
-                className={`p-3 rounded-lg border smooth-transition text-sm font-medium ${
+                onClick={() => handleCategoryChange(category.slug)}
+                className={`p-3 rounded-lg border smooth-transition text-sm font-medium cursor-pointer ${
                   isSelected
-                    ? 'bg-primary/10 border-primary text-primary' :'bg-surface border-border text-text-secondary hover:border-border-hover hover:text-text-primary'
-                } ${
-                  (formData.categories || []).length >= 5 && !isSelected
-                    ? 'opacity-50 cursor-not-allowed' :'cursor-pointer'
+                    ? 'bg-primary/10 border-primary text-primary' 
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover hover:text-text-primary'
                 }`}
               >
-                {category}
+                {category.name}
               </button>
             );
           })}
         </div>
         
-        {errors.categories && (
-          <p className="text-error text-xs mt-2">{errors.categories}</p>
+        {errors.category && (
+          <p className="text-error text-xs mt-2">{errors.category}</p>
         )}
-        
-        <div className="mt-3 text-xs text-text-muted">
-          Selected: {(formData.categories || []).length}/5
-        </div>
       </div>
 
       <div className="flex justify-end">

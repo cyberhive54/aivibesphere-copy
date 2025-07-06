@@ -10,6 +10,7 @@ import ToolGrid from './components/ToolGrid';
 import BannerAd from './components/BannerAd';
 import Button from '../../components/ui/Button';
 import toolsService from '../../utils/toolsService';
+import { ALL_CATEGORIES, findCategoryBySlug, getCategoryDisplayName } from '../../utils/categories';
 
 const CategoryListingPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,7 +25,7 @@ const CategoryListingPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
   
-  // Filter and sort state
+  // Filter and sort state - use slug for category filter
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
     minRating: parseFloat(searchParams.get('minRating')) || 0,
@@ -40,26 +41,6 @@ const CategoryListingPage = () => {
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'recent');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
-  // Categories mapping from database enum to display names
-  const categories = [
-    { id: 'productivity', name: 'Productivity', slug: 'productivity' },
-    { id: 'design', name: 'Design', slug: 'design' },
-    { id: 'writing', name: 'Writing', slug: 'writing' },
-    { id: 'coding', name: 'Coding', slug: 'coding' },
-    { id: 'marketing', name: 'Marketing', slug: 'marketing' },
-    { id: 'sales', name: 'Sales', slug: 'sales' },
-    { id: 'analytics', name: 'Analytics', slug: 'analytics' },
-    { id: 'video', name: 'Video', slug: 'video' },
-    { id: 'audio', name: 'Audio', slug: 'audio' },
-    { id: 'image', name: 'Image', slug: 'image' },
-    { id: 'chatbot', name: 'Chatbot', slug: 'chatbot' },
-    { id: 'automation', name: 'Automation', slug: 'automation' },
-    { id: 'business', name: 'Business', slug: 'business' },
-    { id: 'education', name: 'Education', slug: 'education' },
-    { id: 'finance', name: 'Finance', slug: 'finance' },
-    { id: 'research', name: 'Research', slug: 'research' }
-  ];
-
   // Load tools from database
   useEffect(() => {
     let isMounted = true;
@@ -73,7 +54,14 @@ const CategoryListingPage = () => {
         const apiFilters = {};
         
         if (filters.category) {
-          apiFilters.category = filters.category;
+          // Ensure we're using the correct database enum value
+          const categoryObj = findCategoryBySlug(filters.category);
+          if (categoryObj) {
+            apiFilters.category = categoryObj.slug;
+          } else {
+            // If category not found in our mapping, try to use it as-is
+            apiFilters.category = filters.category;
+          }
         }
         
         if (searchQuery) {
@@ -388,7 +376,7 @@ const CategoryListingPage = () => {
                   onClose={() => {}}
                   filters={filters}
                   onFiltersChange={handleFiltersChange}
-                  categories={categories}
+                  categories={ALL_CATEGORIES}
                   activeFiltersCount={activeFiltersCount}
                 />
               </div>
@@ -401,7 +389,7 @@ const CategoryListingPage = () => {
                 filters={filters}
                 onRemoveFilter={handleRemoveFilter}
                 onClearAll={handleClearAllFilters}
-                categories={categories}
+                categories={ALL_CATEGORIES}
               />
 
               {/* Sort Controls */}
@@ -431,7 +419,7 @@ const CategoryListingPage = () => {
         onClose={() => setIsFilterPanelOpen(false)}
         filters={filters}
         onFiltersChange={handleFiltersChange}
-        categories={categories}
+        categories={ALL_CATEGORIES}
         activeFiltersCount={activeFiltersCount}
       />
 
