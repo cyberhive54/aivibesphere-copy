@@ -1,6 +1,12 @@
 import { supabase } from './supabase';
 
 class ToolsService {
+  // Helper function to check if a string is a valid UUID
+  isValidUUID(str) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  }
+
   // Get all tools with optional filters
   async getTools(filters = {}) {
     try {
@@ -80,12 +86,19 @@ class ToolsService {
   // Get tool by ID or slug
   async getTool(identifier) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('tools')
         .select('*')
-        .or(`id.eq.${identifier},slug.eq.${identifier}`)
-        .eq('is_active', true)
-        .single();
+        .eq('is_active', true);
+
+      // Check if identifier is a valid UUID
+      if (this.isValidUUID(identifier)) {
+        query = query.eq('id', identifier);
+      } else {
+        query = query.eq('slug', identifier);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) {
         return { success: false, error: error.message };
