@@ -4,11 +4,17 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 import { useComparison } from '../../../components/ui/ComparisonCart';
+import { useAuth } from '../../../contexts/AuthContext';
+import favoritesService from '../../../utils/favoritesService';
 
 const ToolCard = ({ tool, onViewTool }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const { addToComparison, removeFromComparison, isInComparison } = useComparison();
   const [comparisonMessage, setComparisonMessage] = useState('');
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  
+  const { addToComparison, removeFromComparison, isInComparison } = useComparison();
+  const { user } = useAuth();
 
   const handleComparisonToggle = (e) => {
     e.preventDefault();
@@ -26,6 +32,28 @@ const ToolCard = ({ tool, onViewTool }) => {
 
     // Clear message after 2 seconds
     setTimeout(() => setComparisonMessage(''), 2000);
+  };
+
+  const handleFavoriteToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      alert('Please sign in to save tools');
+      return;
+    }
+
+    setFavoriteLoading(true);
+    try {
+      const result = await favoritesService.toggleFavorite(user.id, tool.id);
+      if (result.success) {
+        setIsFavorited(!isFavorited);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    } finally {
+      setFavoriteLoading(false);
+    }
   };
 
   const handleViewTool = () => {
@@ -93,8 +121,23 @@ const ToolCard = ({ tool, onViewTool }) => {
             </span>
           </div>
 
-          {/* Comparison Toggle */}
-          <div className="absolute top-3 right-3">
+          {/* Action Buttons */}
+          <div className="absolute top-3 right-3 flex gap-2">
+            {/* Favorite Button */}
+            <Button
+              variant={isFavorited ? "primary" : "ghost"}
+              onClick={handleFavoriteToggle}
+              iconName={favoriteLoading ? "Loader2" : (isFavorited ? "Heart" : "Heart")}
+              className={`p-2 ${
+                isFavorited 
+                  ? 'bg-red-500 text-white' 
+                  : 'bg-black/50 text-white hover:bg-black/70'
+              } ${favoriteLoading ? 'animate-spin' : ''}`}
+              title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+              disabled={favoriteLoading}
+            />
+
+            {/* Comparison Toggle */}
             <Button
               variant={isInComparison(tool.id) ? "primary" : "ghost"}
               onClick={handleComparisonToggle}
@@ -113,6 +156,15 @@ const ToolCard = ({ tool, onViewTool }) => {
             <div className="absolute bottom-3 left-3">
               <span className="bg-accent text-accent-foreground text-xs px-2 py-1 rounded-full font-medium">
                 Featured
+              </span>
+            </div>
+          )}
+
+          {/* Trending Badge */}
+          {tool.is_trending && (
+            <div className="absolute bottom-3 right-3">
+              <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                🔥 Trending
               </span>
             </div>
           )}

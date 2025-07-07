@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import Header from '../../components/ui/Header';
 import ComparisonCart from '../../components/ui/ComparisonCart';
+import ScrollToTopButton from '../../components/ui/ScrollToTopButton';
 import HeroSection from './components/HeroSection';
 import CategoryChips from './components/CategoryChips';
 import FeaturedTools from './components/FeaturedTools';
+import TrendingSection from './components/TrendingSection';
+import JustLaunchedSection from './components/JustLaunchedSection';
 import CategorySections from './components/CategorySections';
 import BannerAd from './components/BannerAd';
 import NewsletterSection from './components/NewsletterSection';
@@ -62,10 +65,16 @@ const Homepage = () => {
           {/* Featured Tools */}
           <FeaturedTools />
 
+          {/* Trending Tools */}
+          <TrendingSection />
+
           {/* Middle Banner Ad */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <BannerAd position="middle" />
           </div>
+
+          {/* Just Launched */}
+          <JustLaunchedSection />
 
           {/* Category Sections */}
           <CategorySections />
@@ -76,6 +85,7 @@ const Homepage = () => {
 
         {/* Floating Elements */}
         <ComparisonCart />
+        <ScrollToTopButton />
 
         {/* Footer */}
         <footer className="bg-surface border-t border-border py-12">
@@ -114,15 +124,17 @@ const Homepage = () => {
                 </div>
               </div>
 
-              {/* Quick Links */}
+              {/* Explore */}
               <div>
                 <h3 className="font-semibold text-text-primary mb-4">Explore</h3>
                 <ul className="space-y-2 text-sm">
                   <li><a href="/category-listing-page" className="text-text-secondary hover:text-primary smooth-transition">All Categories</a></li>
                   <li><a href="/category-listing-page?featured=true" className="text-text-secondary hover:text-primary smooth-transition">Featured Tools</a></li>
-                  <li><a href="/category-listing-page?sort=newest" className="text-text-secondary hover:text-primary smooth-transition">New Releases</a></li>
-                  <li><a href="/category-listing-page?sort=popular" className="text-text-secondary hover:text-primary smooth-transition">Most Popular</a></li>
+                  <li><a href="/trending-tools" className="text-text-secondary hover:text-primary smooth-transition">Trending Tools</a></li>
+                  <li><a href="/just-launched" className="text-text-secondary hover:text-primary smooth-transition">Just Launched</a></li>
                   <li><a href="/tool-comparison-page" className="text-text-secondary hover:text-primary smooth-transition">Compare Tools</a></li>
+                  <li><a href="/deals" className="text-text-secondary hover:text-primary smooth-transition">Deals & Offers</a></li>
+                  <li><a href="/tool-directory" className="text-text-secondary hover:text-primary smooth-transition">Tool Directory</a></li>
                 </ul>
               </div>
 
@@ -131,10 +143,12 @@ const Homepage = () => {
                 <h3 className="font-semibold text-text-primary mb-4">Resources</h3>
                 <ul className="space-y-2 text-sm">
                   <li><a href="/tool-submission-form" className="text-text-secondary hover:text-primary smooth-transition">Submit Tool</a></li>
+                  <li><a href="/request-feature" className="text-text-secondary hover:text-primary smooth-transition">Request Feature</a></li>
+                  <li><a href="/report-bug" className="text-text-secondary hover:text-primary smooth-transition">Report Bug</a></li>
+                  <li><a href="/contact-us" className="text-text-secondary hover:text-primary smooth-transition">Contact Us</a></li>
+                  <li><a href="/advertise" className="text-text-secondary hover:text-primary smooth-transition">Advertise</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">API Documentation</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Help Center</a></li>
-                  <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Blog</a></li>
-                  <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Community</a></li>
                 </ul>
               </div>
 
@@ -144,9 +158,9 @@ const Homepage = () => {
                 <ul className="space-y-2 text-sm">
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Privacy Policy</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Terms of Service</a></li>
+                  <li><a href="/disclaimer" className="text-text-secondary hover:text-primary smooth-transition">Disclaimer</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Cookie Policy</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">GDPR</a></li>
-                  <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Contact Us</a></li>
                 </ul>
               </div>
             </div>

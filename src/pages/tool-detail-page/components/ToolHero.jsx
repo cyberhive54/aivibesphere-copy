@@ -2,8 +2,11 @@ import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInComparison }) => {
+  const { user } = useAuth();
+
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -25,6 +28,15 @@ const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInCompa
       }
     }
     return stars;
+  };
+
+  const handleBookmark = () => {
+    if (!user) {
+      // Show login prompt or redirect to login
+      alert('Please sign in to bookmark tools');
+      return;
+    }
+    onBookmark();
   };
 
   return (
@@ -91,7 +103,7 @@ const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInCompa
             <div className="flex flex-col sm:flex-row gap-3 sm:flex-shrink-0">
               <Button
                 variant="ghost"
-                onClick={onBookmark}
+                onClick={handleBookmark}
                 iconName={isBookmarked ? "BookmarkCheck" : "Bookmark"}
                 className={`${isBookmarked ? 'text-accent' : 'text-text-secondary'} hover:text-accent`}
               >
@@ -122,6 +134,7 @@ const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInCompa
               iconName="ExternalLink"
               iconPosition="right"
               className="flex-1 sm:flex-none"
+              onClick={() => window.open(tool.websiteUrl, '_blank')}
             >
               Visit {tool.name}
             </Button>
@@ -132,6 +145,7 @@ const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInCompa
                 iconName="Download"
                 iconPosition="right"
                 className="flex-1 sm:flex-none"
+                onClick={() => window.open(tool.websiteUrl, '_blank')}
               >
                 Try Free
               </Button>

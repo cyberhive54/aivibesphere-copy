@@ -24,6 +24,14 @@ class ToolsService {
         query = query.eq('is_featured', true);
       }
 
+      if (filters.trending) {
+        query = query.eq('is_trending', true);
+      }
+
+      if (filters.justLaunched) {
+        query = query.eq('is_just_launched', true);
+      }
+
       if (filters.search) {
         query = query.or(`name.ilike.%${filters.search}%, description.ilike.%${filters.search}%`);
       }
@@ -147,6 +155,48 @@ class ToolsService {
     }
   }
 
+  // Get trending tools
+  async getTrendingTools(limit = 6) {
+    try {
+      const { data, error } = await supabase
+        .from('tools')
+        .select('*')
+        .eq('is_trending', true)
+        .eq('is_active', true)
+        .order('view_count', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      return { success: false, error: 'Failed to load trending tools' };
+    }
+  }
+
+  // Get just launched tools
+  async getJustLaunchedTools(limit = 6) {
+    try {
+      const { data, error } = await supabase
+        .from('tools')
+        .select('*')
+        .eq('is_just_launched', true)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      return { success: false, error: 'Failed to load just launched tools' };
+    }
+  }
+
   // Get tools by category
   async getToolsByCategory(category, limit = 12) {
     try {
@@ -206,7 +256,7 @@ class ToolsService {
     }
   }
 
-  // Increment tool view count
+  // Increment tool view count with debouncing
   async incrementViewCount(toolId) {
     try {
       // Use the increment function from the database
