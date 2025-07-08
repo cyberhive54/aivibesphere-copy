@@ -130,11 +130,11 @@ const Homepage = () => {
                 <ul className="space-y-2 text-sm">
                   <li><a href="/category-listing-page" className="text-text-secondary hover:text-primary smooth-transition">All Categories</a></li>
                   <li><a href="/category-listing-page?featured=true" className="text-text-secondary hover:text-primary smooth-transition">Featured Tools</a></li>
-                  <li><a href="/trending-tools" className="text-text-secondary hover:text-primary smooth-transition">Trending Tools</a></li>
-                  <li><a href="/just-launched" className="text-text-secondary hover:text-primary smooth-transition">Just Launched</a></li>
+                  <li><a href="/trending-tools-page" className="text-text-secondary hover:text-primary smooth-transition">Trending Tools</a></li>
+                  <li><a href="/just-launched-page" className="text-text-secondary hover:text-primary smooth-transition">Just Launched</a></li>
                   <li><a href="/tool-comparison-page" className="text-text-secondary hover:text-primary smooth-transition">Compare Tools</a></li>
-                  <li><a href="/deals" className="text-text-secondary hover:text-primary smooth-transition">Deals & Offers</a></li>
-                  <li><a href="/tool-directory" className="text-text-secondary hover:text-primary smooth-transition">Tool Directory</a></li>
+                  <li><a href="/deals-page" className="text-text-secondary hover:text-primary smooth-transition">Deals & Offers</a></li>
+                  <li><a href="/tool-directory-page" className="text-text-secondary hover:text-primary smooth-transition">Tool Directory</a></li>
                 </ul>
               </div>
 
@@ -143,10 +143,10 @@ const Homepage = () => {
                 <h3 className="font-semibold text-text-primary mb-4">Resources</h3>
                 <ul className="space-y-2 text-sm">
                   <li><a href="/tool-submission-form" className="text-text-secondary hover:text-primary smooth-transition">Submit Tool</a></li>
-                  <li><a href="/request-feature" className="text-text-secondary hover:text-primary smooth-transition">Request Feature</a></li>
-                  <li><a href="/report-bug" className="text-text-secondary hover:text-primary smooth-transition">Report Bug</a></li>
-                  <li><a href="/contact-us" className="text-text-secondary hover:text-primary smooth-transition">Contact Us</a></li>
-                  <li><a href="/advertise" className="text-text-secondary hover:text-primary smooth-transition">Advertise</a></li>
+                  <li><a href="/request-feature-page" className="text-text-secondary hover:text-primary smooth-transition">Request Feature</a></li>
+                  <li><a href="/report-bug-page" className="text-text-secondary hover:text-primary smooth-transition">Report Bug</a></li>
+                  <li><a href="/contact-us-page" className="text-text-secondary hover:text-primary smooth-transition">Contact Us</a></li>
+                  <li><a href="/advertise-page" className="text-text-secondary hover:text-primary smooth-transition">Advertise</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">API Documentation</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Help Center</a></li>
                 </ul>
@@ -158,7 +158,7 @@ const Homepage = () => {
                 <ul className="space-y-2 text-sm">
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Privacy Policy</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Terms of Service</a></li>
-                  <li><a href="/disclaimer" className="text-text-secondary hover:text-primary smooth-transition">Disclaimer</a></li>
+                  <li><a href="/disclaimer-page" className="text-text-secondary hover:text-primary smooth-transition">Disclaimer</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">Cookie Policy</a></li>
                   <li><a href="#" className="text-text-secondary hover:text-primary smooth-transition">GDPR</a></li>
                 </ul>

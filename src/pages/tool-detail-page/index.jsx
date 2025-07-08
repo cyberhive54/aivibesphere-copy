@@ -11,6 +11,7 @@ import AdBanner from './components/AdBanner';
 import Icon from '../../components/AppIcon';
 import toolsService from '../../utils/toolsService';
 import ratingsService from '../../utils/ratingsService';
+import favoritesService from '../../utils/favoritesService';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ToolDetailPage = () => {
@@ -91,9 +92,16 @@ const ToolDetailPage = () => {
 
   useEffect(() => {
     // Check if tool is bookmarked
-    const bookmarks = JSON.parse(localStorage.getItem('aivibesphere-bookmarks') || '[]');
-    setIsBookmarked(bookmarks.includes(toolId));
-  }, [toolId]);
+    if (user?.id && tool?.id) {
+      const checkFavoriteStatus = async () => {
+        const result = await favoritesService.isToolFavorited(user.id, tool.id);
+        if (result.success) {
+          setIsBookmarked(result.isFavorited);
+        }
+      };
+      checkFavoriteStatus();
+    }
+  }, [toolId, user?.id, tool?.id]);
 
   const incrementViewCount = (id) => {
     // Debounced view count increment
@@ -108,17 +116,25 @@ const ToolDetailPage = () => {
   };
 
   const handleBookmark = () => {
-    const bookmarks = JSON.parse(localStorage.getItem('aivibesphere-bookmarks') || '[]');
-    let updatedBookmarks;
-    
-    if (isBookmarked) {
-      updatedBookmarks = bookmarks.filter(id => id !== toolId);
-    } else {
-      updatedBookmarks = [...bookmarks, toolId];
+    if (!user) {
+      alert('Please sign in to save tools');
+      return;
     }
     
-    localStorage.setItem('aivibesphere-bookmarks', JSON.stringify(updatedBookmarks));
-    setIsBookmarked(!isBookmarked);
+    const toggleFavorite = async () => {
+      try {
+        const result = await favoritesService.toggleFavorite(user.id, tool.id);
+        if (result.success) {
+          setIsBookmarked(!isBookmarked);
+        } else {
+          console.error('Failed to toggle favorite:', result.error);
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+      }
+    };
+    
+    toggleFavorite();
   };
 
   const handleAddToComparison = () => {

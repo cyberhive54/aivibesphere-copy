@@ -3,6 +3,7 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 import { useAuth } from '../../../contexts/AuthContext';
+import favoritesService from '../../../utils/favoritesService';
 
 const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInComparison }) => {
   const { user } = useAuth();
@@ -36,7 +37,22 @@ const ToolHero = ({ tool, onBookmark, isBookmarked, onAddToComparison, isInCompa
       alert('Please sign in to bookmark tools');
       return;
     }
-    onBookmark();
+    
+    // Call the favorites service
+    const toggleFavorite = async () => {
+      try {
+        const result = await favoritesService.toggleFavorite(user.id, tool.id);
+        if (result.success) {
+          onBookmark(); // Update parent component state
+        } else {
+          console.error('Failed to toggle favorite:', result.error);
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+      }
+    };
+    
+    toggleFavorite();
   };
 
   return (

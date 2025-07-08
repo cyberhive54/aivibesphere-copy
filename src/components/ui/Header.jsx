@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Menu, X, User, LogOut, Settings, Plus } from 'lucide-react';
+import { Search, Menu, X, User, LogOut, Settings, Plus, Heart } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../auth/AuthModal';
@@ -128,6 +128,15 @@ const Header = () => {
                         )}
                       </div>
                       
+                      <Link
+                        to="/favorites"
+                        className="flex items-center px-4 py-2 text-sm text-text-secondary hover:text-primary hover:bg-surface-hover smooth-transition"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <Heart className="w-4 h-4 mr-2" />
+                        My Favorites
+                      </Link>
+                      
                       {userProfile?.role === 'admin' && (
                         <Link
                           to="/admin-dashboard"
@@ -240,6 +249,15 @@ const Header = () => {
                         <p className="text-xs text-text-secondary">{user?.email}</p>
                       </div>
                     </div>
+                    
+                    <Link
+                      to="/favorites"
+                      className="flex items-center w-full p-3 text-text-secondary hover:text-primary hover:bg-surface-hover rounded-lg smooth-transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Heart className="w-4 h-4 mr-3" />
+                      My Favorites
+                    </Link>
                     
                     {userProfile?.role === 'admin' && (
                       <Link
